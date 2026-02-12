@@ -1,0 +1,43 @@
+# === IDEs & Editors ===
+# Rider / IntelliJ / WebStorm
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+!.vscode/extensions.json  # Keep recommended extensions if desired
+
+# Visual Studio (Windows)
+.vs/
+[Vv]isual[Ss]tudio[Cc]onfig
+*.user
+*.userosscache
+*.sln.docstates
+
+# === C# / .NET Build & Artifacts ===
+# Covers both Server and Simulator projects
+[Bb]in/
+[Oo]bj/
+# Specific for publishing
+publish/
+# Test results
+TestResults/
+# Tooling
+.config/dotnet-tools.json
+
+# === Rust Build & Artifacts ===
+# This covers the client-lib-rust folder
+target/
+# Cargo-generated backup files
+**/*.rs.bk
+
+# === Infrastructure & Docker ===
+# DO NOT push your database data (Redpanda/Clickhouse)
+infra/**/data/
+# Environment secrets
+*.env
+*.env.local
+
+# === OS Specific ===
+.DS_Store
+Thumbs.db
