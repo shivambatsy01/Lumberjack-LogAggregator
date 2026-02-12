@@ -1,0 +1,56 @@
+version: '3.8'
+
+networks:
+  default:
+    name: project-network
+
+services:
+  #Redpanda: Lightest Kafka-Compatible broker
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: redpanda-broker
+    #Resources limits are critical as we will be deploying it on free tier EC2 instanmce with 1GB Ram only
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+      command:
+        - redpanda
+        - start
+        - --mode dev-container
+        - --smp 1      #Restrict to 1 CPU core 
+        - memory 256M   #Eplicitley setting limits to redpanda
+        - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+        - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      volumes:
+        - ./redpanda/data:/var/lib/redpanda/data
+      ports:
+        - "19092:19092"
+
+  #ClickHouse : optimised for low memory
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-db
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    environment:
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=admin
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Maps the storage limit config
+      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/storage.xml
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+

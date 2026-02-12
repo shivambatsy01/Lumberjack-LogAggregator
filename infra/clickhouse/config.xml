@@ -1,0 +1,10 @@
+<clickhouse>
+    <storage_configuration>
+        <disks>
+            <default>
+                <path>/var/lib/clickhouse/</path>
+                <keep_free_space_bytes>16106127360</keep_free_space_bytes>
+            </default>
+        </disks>
+    </storage_configuration>
+</clickhouse>
