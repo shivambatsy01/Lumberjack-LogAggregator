@@ -24,8 +24,8 @@ services:
     container_name: clickhouse-db
     init: true
     environment:
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: password123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
     deploy:
       resources:
         limits:
@@ -50,8 +50,8 @@ services:
     environment:
       CLICKHOUSE_HOST: clickhouse-db
       CLICKHOUSE_PORT: 8123
-      CLICKHOUSE_USER: default
-      CLICKHOUSE_PASSWORD: password123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
 volumes:
   clickhouse_data:
