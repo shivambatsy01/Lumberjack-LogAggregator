@@ -37,6 +37,7 @@ infra/**/data/
 # Environment secrets
 *.env
 *.env.local
+infra/.env
 
 # === OS Specific ===
 .DS_Store
