@@ -9,23 +9,23 @@ services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:latest
     container_name: redpanda-broker
-    #Resources limits are critical as we will be deploying it on free tier EC2 instanmce with 1GB Ram only
+    #Resources limits are critical as we will be deploying it on free tier EC2 instance with 1GB Ram only
     deploy:
       resources:
         limits:
           memory: 300M
-      command:
-        - redpanda
-        - start
-        - --mode dev-container
-        - --smp 1      #Restrict to 1 CPU core 
-        - memory 256M   #Eplicitley setting limits to redpanda
-        - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-        - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
-      volumes:
-        - ./redpanda/data:/var/lib/redpanda/data
-      ports:
-        - "19092:19092"
+    command:
+      - redpanda
+      - start
+      - --mode dev-container
+      - --smp 1      #Restrict to 1 CPU core 
+      - --memory 256M   #Eplicitly setting limits to redpanda
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+    volumes:
+      - ./redpanda/data:/var/lib/redpanda/data
+    ports:
+      - "19092:19092"
 
   #ClickHouse : optimised for low memory
   clickhouse:
@@ -40,7 +40,7 @@ services:
       - CLICKHOUSE_PASSWORD=admin
     volumes:
       - ./clickhouse/data:/var/lib/clickhouse
-      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./clickhouse/init/01_create_log_table.sql:/docker-entrypoint-initdb.d/init.sql
       # Maps the storage limit config
       - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/storage.xml
     ports:
