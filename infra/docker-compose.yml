@@ -1,25 +1,17 @@
-version: '3.8'
-
-networks:
-  default:
-    name: project-network
-
 services:
-  #Redpanda: Lightest Kafka-Compatible broker
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:latest
     container_name: redpanda-broker
-    #Resources limits are critical as we will be deploying it on free tier EC2 instance with 1GB Ram only
+    init: true
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1G
+          cpus: '1'
     command:
       - redpanda
       - start
       - --mode dev-container
-      - --smp 1      #Restrict to 1 CPU core 
-      - --memory 256M   #Eplicitly setting limits to redpanda
       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
       - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
     volumes:
@@ -27,22 +19,20 @@ services:
     ports:
       - "19092:19092"
 
-  #ClickHouse : optimised for low memory
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse-db
+    init: true
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password123
     deploy:
       resources:
         limits:
-          memory: 400M
-    environment:
-      - CLICKHOUSE_USER=admin
-      - CLICKHOUSE_PASSWORD=admin
+          memory: 1G
     volumes:
-      - ./clickhouse/data:/var/lib/clickhouse
-      - ./clickhouse/init/01_create_log_table.sql:/docker-entrypoint-initdb.d/init.sql
-      # Maps the storage limit config
-      - ./clickhouse/config.xml:/etc/clickhouse-server/config.d/storage.xml
+      - ./clickhouse/init/01_create_log_table.sql:/docker-entrypoint-initdb.d/01_create_log_table.sql
+      - clickhouse_data:/var/lib/clickhouse
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -51,6 +41,25 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  tabix:
+    image: spoonest/clickhouse-tabix-web-client:latest
+    container_name: tabix-ui
+    ports:
+      - "8080:80"
+    environment:
+      CLICKHOUSE_HOST: clickhouse-db
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password123
+
+volumes:
+  clickhouse_data:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=15G
 
 
 
